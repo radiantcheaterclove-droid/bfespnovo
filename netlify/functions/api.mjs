@@ -26,6 +26,29 @@ export default async (req) => {
     await store.setJSON(m.id, m);
     return J(m);
   }
+  if (p === "delete" && post) {
+    const id = cl(b.id, 80), name = cl(b.name, 24), tok = cl(b.token, 60);
+    if (!id.startsWith("m/") || !name || !tok) return J({ error: "inválido" }, 400);
+    const acc = await store.get("n/" + encodeURIComponent(name.toLowerCase()), { type: "json" });
+    if (!acc || acc.token !== tok) return J({ error: "Sem permissão" }, 403);
+    const m = await store.get(id, { type: "json" });
+    if (!m) return J({ ok: true });
+    if (String(m.name).toLowerCase() !== name.toLowerCase()) return J({ error: "Você só pode apagar a sua própria mensagem" }, 403);
+    await store.delete(id);
+    if (m.img) await store.delete("i/" + id);
+    const now = Date.now();
+    await store.set("x/" + String(now).padStart(15, "0") + "|" + id, "1");
+    const old = (await store.list({ prefix: "x/" })).blobs.map((x) => x.key).filter((k) => k < "x/" + String(now - 864e5).padStart(15, "0"));
+    await Promise.all(old.map((k) => store.delete(k)));
+    return J({ ok: true });
+  }
+  if (p === "deleted") {
+    const after = u.searchParams.get("after") || "";
+    let ks = (await store.list({ prefix: "x/" })).blobs.map((x) => x.key).sort();
+    const cursor = ks.length ? ks[ks.length - 1] : "";
+    ks = after ? ks.filter((k) => k > after) : ks.slice(-200);
+    return J({ ids: ks.map((k) => k.slice(k.indexOf("|") + 1)), cursor });
+  }
   if (p === "blacklist") {
     if (!post) return J(await all("b/"));
     const name = cl(b.name, 60), reason = cl(b.reason, 300), by = cl(b.by, 24);
