@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BFEsp · Forças Especiais do Exército Brasileiro</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--red:#d1121f;--blood:#6e0a11;--coal:#0b0b0c;--steel:#17181b;--bone:#efe9dd;--mute:#9a958a;--line:#2b2c30}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bone:#efe9dd}}
+:root[data-theme="dark"]{--bone:#efe9dd}
+*{box-sizing:border-box;margin:0}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--coal) repeating-linear-gradient(-45deg,transparent 0 22px,rgba(209,18,31,.06) 22px 24px);color:var(--bone);font:16px/1.5 'Barlow',system-ui,sans-serif;min-height:100%}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+header{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid var(--line)}
+header svg{width:38px}header b{font:800 26px 'Barlow Condensed';letter-spacing:.06em}header span{margin-left:auto;color:var(--mute);font-size:14px}
+.hero{display:grid;grid-template-columns:1.3fr .7fr;align-items:center;gap:20px;padding:46px 28px 30px;max-width:1280px;margin:auto}
+.slab{background:var(--red);padding:10px 34px 22px;clip-path:polygon(0 0,100% 0,94% 100%,0 100%);box-shadow:inset 0 -14px 0 var(--blood)}
+h1{font:800 clamp(84px,15vw,200px)/.9 'Barlow Condensed';letter-spacing:.02em;color:var(--coal)}
+.slab p{font:600 clamp(16px,2.2vw,24px) 'Barlow Condensed';letter-spacing:.18em;color:#fff;text-transform:uppercase}
+.emb{display:grid;place-items:center}.emb svg{width:min(300px,70%);filter:drop-shadow(0 0 38px rgba(209,18,31,.55))}
+.wrap{max-width:1280px;margin:auto;padding:10px 28px 80px;display:grid;grid-template-columns:1.15fr 1fr;gap:22px}
+.gate{grid-column:1/-1;background:var(--steel);border-left:6px solid var(--red);padding:16px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.gate input{flex:1;min-width:180px}.gate small{color:var(--mute)}
+.panel{background:var(--steel);border-top:5px solid var(--red);display:flex;flex-direction:column;min-height:560px}
+.panel h2{font:800 28px 'Barlow Condensed';letter-spacing:.08em;padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.live{font:600 13px 'Barlow';color:var(--mute);letter-spacing:0}.live:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:#2ecc71;margin-right:7px;box-shadow:0 0 10px #2ecc71}
+input,textarea{background:#0f1012;border:1px solid var(--line);color:var(--bone);padding:12px 14px;font:inherit;border-radius:3px;width:100%}
+textarea{resize:vertical;min-height:70px}
+.btn{background:var(--red);color:#fff;border:0;padding:12px 22px;font:800 17px 'Barlow Condensed';letter-spacing:.1em;cursor:pointer;border-radius:3px;box-shadow:0 4px 0 var(--blood);text-transform:uppercase}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--blood)}.btn:disabled{opacity:.4}
+#msgs{flex:1;height:420px;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:85%;padding:8px 12px;background:#222428;border-radius:3px 12px 12px 12px;word-break:break-word}
+.m.me{align-self:flex-end;background:var(--blood);border-radius:12px 3px 12px 12px}
+.m b{display:block;font:800 14px 'Barlow Condensed';letter-spacing:.08em;color:#ff6b73}.m.me b{color:#ffd0d3}
+.send{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--line)}
+.bl{padding:14px 18px;display:grid;gap:10px;border-bottom:1px solid var(--line)}
+#list{overflow-y:auto;max-height:420px;padding:14px 18px;display:grid;gap:12px}
+.fi{border:1px solid var(--red);background:#120a0b;padding:12px 14px;position:relative;font-family:'Special Elite',monospace}
+.fi:after{content:"BLACKLIST";position:absolute;right:10px;top:8px;border:2px solid var(--red);color:var(--red);padding:0 6px;font:800 12px 'Barlow Condensed';letter-spacing:.14em;transform:rotate(6deg)}
+.fi h3{font:400 20px 'Special Elite';color:#fff;padding-right:90px}.fi p{margin:4px 0 6px;color:#e6d9d0}.fi small{color:var(--mute)}
+.empty{color:var(--mute);text-align:center;padding:30px 0}
+#demo{background:var(--blood);padding:8px 28px;font-size:14px}
+@media (max-width:900px){.hero,.wrap{grid-template-columns:1fr}.emb{order:-1}.emb svg{width:150px}.slab{clip-path:none}.wrap,.hero,header{padding-left:16px;padding-right:16px}}
+</style></head><body>
+<div id="demo" hidden>Modo demonstração: sem servidor Netlify, os dados ficam só neste navegador. No site publicado no Netlify tudo é compartilhado e permanente.</div>
+<header><svg id="lg" viewBox="0 0 200 220"></svg><b>BFEsp</b><span>Exército Brasileiro</span></header>
+<section class="hero"><div class="slab"><h1>BFEsp</h1><p>Forças Especiais do Exército Brasileiro</p></div><div class="emb"><svg id="em" viewBox="0 0 200 220"></svg></div></section>
+<main class="wrap">
+<form class="gate" id="gate"><b>Seu nome:</b><input id="nm" maxlength="24" placeholder="Nome de guerra (fica salvo para sempre)" autocomplete="off"><button class="btn">Registrar</button><small id="gm">Depois de registrado, o nome não pode ser trocado.</small></form>
+<section class="panel"><h2>Bate-papo da tropa <span class="live">ao vivo</span></h2><div id="msgs"></div>
+<form class="send" id="sf"><input id="tx" maxlength="400" placeholder="Digite e aperte Enter" autocomplete="off"><button class="btn">Enviar</button></form></section>
+<section class="panel"><h2>Blacklist</h2>
+<form class="bl" id="bf"><input id="bn" maxlength="60" placeholder="Nome da pessoa"><textarea id="br" maxlength="300" placeholder="Motivo"></textarea><button class="btn">Adicionar à blacklist</button></form>
+<div id="list"></div></section>
+</main>
+<script>
+var SH='<path d="M100 8L184 36V110C184 160 146 196 100 214 54 196 16 160 16 110V36Z" fill="#141416" stroke="#d1121f" stroke-width="7"/><path id="w" d="M94 84C70 74 46 78 26 62 42 94 68 104 94 100Z" fill="#efe9dd"/><use href="#w" transform="translate(200 0) scale(-1 1)"/><path d="M100 30L109 124 100 156 91 124Z" fill="#d1121f"/><rect x="74" y="120" width="52" height="9" fill="#efe9dd"/><rect x="96" y="129" width="8" height="30" fill="#efe9dd"/><circle cx="100" cy="165" r="7" fill="#efe9dd"/>';
+lg.innerHTML=SH;em.innerHTML=SH;
+var $=function(s){return document.querySelector(s)},demo=false;
+var S={g:function(k){try{return localStorage.getItem(k)}catch(e){return null}},s:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+var me=S.g('bf_name')||'',tok=S.g('bf_tok')||String(Math.random()).slice(2)+Date.now();S.s('bf_tok',tok);
+function J(k,d){try{return JSON.parse(S.g(k))||d}catch(e){return d}}
+function local(p,b){var q=p.split('?')[0];
+ if(q==='chat'){var a=J('c',[]);if(b){var m={id:'l'+String(Date.now()).padStart(15,'0'),cid:b.cid,name:b.name,text:b.text,ts:Date.now()};a.push(m);S.s('c',JSON.stringify(a));return{s:200,d:m}}
+  var af=decodeURIComponent((p.split('after=')[1]||''));return{s:200,d:af?a.filter(function(m){return m.id>af}):a.slice(-80)}}
+ if(q==='blacklist'){var l=J('b',[]);if(b){b.id='l'+Date.now();b.ts=Date.now();l.push(b);S.s('b',JSON.stringify(l));return{s:200,d:b}}return{s:200,d:l}}
+ return{s:200,d:{ok:true}}}
+async function api(p,b){if(!demo){try{var r=await fetch('/api/'+p,b?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)}:undefined);
+ if(r.ok||r.status===409||r.status===400)return{s:r.status,d:await r.json()}}catch(e){}demo=true;$('#demo').hidden=false}return local(p,b)}
+function h(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function paintGate(){$('#gate').style.display='';if(me){$('#nm').value=me;$('#nm').disabled=true;$('#gate button').hidden=true;$('#gm').textContent='Nome salvo para sempre neste aparelho.'}}
+$('#gate').onsubmit=async function(e){e.preventDefault();var n=$('#nm').value.trim();if(n.length<2)return;var r=await api('name',{name:n,token:tok});
+ if(r.s!==200){$('#gm').textContent=r.d.error||'Erro';return}me=n;S.s('bf_name',n);paintGate()};paintGate();
+var seen={},last='',box=$('#msgs');
+function add(m){var k=m.cid||m.id;if(seen[k])return;seen[k]=1;var near=box.scrollHeight-box.scrollTop-box.clientHeight<90,d=h('div','m'+(m.name===me?' me':''));d.appendChild(h('b','',m.name));d.appendChild(h('span','',m.text));box.appendChild(d);if(near||m.name===me)box.scrollTop=box.scrollHeight}
+async function poll(){try{var r=await api('chat?after='+encodeURIComponent(last));r.d.forEach(function(m){if(m.id>last)last=m.id;add(m)})}catch(e){}setTimeout(poll,document.hidden?3000:700)}poll();
+$('#sf').onsubmit=async function(e){e.preventDefault();var t=$('#tx').value.trim();if(!t)return;if(!me){$('#nm').focus();return}$('#tx').value='';
+ var c=Math.random().toString(36).slice(2),m={cid:c,name:me,text:t};add(m);await api('chat',m)};
+function fmt(t){return new Date(t).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}
+async function load(){var r=await api('blacklist'),l=$('#list');l.textContent='';if(!r.d.length){l.appendChild(h('div','empty','Nenhum nome na blacklist.'));return}
+ r.d.slice().sort(function(a,b){return b.ts-a.ts}).forEach(function(e){var f=h('div','fi');f.appendChild(h('h3','',e.name));f.appendChild(h('p','',e.reason));f.appendChild(h('small','','por '+e.by+' · '+fmt(e.ts)));l.appendChild(f)})}
+load();setInterval(load,4000);
+$('#bf').onsubmit=async function(e){e.preventDefault();if(!me){$('#nm').focus();return}var n=$('#bn').value.trim(),r=$('#br').value.trim();if(!n||!r)return;
+ $('#bn').value=$('#br').value='';await api('blacklist',{name:n,reason:r,by:me});load()};
+</script></body></html>
