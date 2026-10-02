@@ -49,6 +49,32 @@ textarea{resize:vertical;min-height:70px}
 #msgs::-webkit-scrollbar-thumb:hover,#list::-webkit-scrollbar-thumb:hover,textarea::-webkit-scrollbar-thumb:hover{background:var(--red);background-clip:padding-box}
 @supports (-moz-appearance:none){#msgs,#list,textarea{scrollbar-width:thin;scrollbar-color:var(--blood) transparent}}
 .fi .del{top:auto;bottom:10px;right:12px;color:#ff6b73;opacity:.85}
+/* transmissão */
+[hidden]{display:none!important}
+.stream{grid-column:1/-1;height:auto;min-height:0}
+.sbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px}
+#sinfo{flex:1;min-width:200px}
+.live.off:before{background:#555;box-shadow:none}
+.vwrap{position:relative;background:#000;aspect-ratio:16/9;max-height:78vh;width:100%;display:grid;place-items:center;overflow:hidden}
+.vwrap video{width:100%;height:100%;object-fit:contain;background:#000}
+.hud{position:absolute;left:10px;top:10px;font:12px/1.3 ui-monospace,Consolas,monospace;background:rgba(0,0,0,.62);padding:4px 8px;border-radius:3px;pointer-events:none}
+.hud:empty{display:none}
+.vstat{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:#fff;background:rgba(0,0,0,.6);font:600 22px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase}
+.vctl{position:absolute;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;padding:26px 14px 10px;background:linear-gradient(transparent,rgba(0,0,0,.8));opacity:0;transition:opacity .2s}
+.vwrap:hover .vctl,.vwrap:focus-within .vctl{opacity:1}
+@media (hover:none){.vctl{opacity:1}}
+.vctl .btn{padding:6px 14px;font-size:14px}
+.vctl input[type=range]{width:110px;padding:0;accent-color:var(--red);background:none;border:0}
+dialog{margin:auto;background:var(--steel);color:var(--bone);border:0;border-top:5px solid var(--red);padding:0;width:min(520px,94vw);max-height:94vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog form{display:grid;gap:12px;padding:18px 20px}
+dialog h3{font:800 28px 'Barlow Condensed';letter-spacing:.08em}
+dialog label{display:grid;gap:4px;font-size:14px;color:var(--mute)}
+dialog label.ck{display:flex;gap:10px;align-items:center;color:var(--bone);font-size:16px}
+dialog label.ck input{width:auto}
+dialog small{color:var(--mute);font-size:13px}
+dialog .row{display:flex;gap:10px;justify-content:flex-end}
+select{background:#0f1012;border:1px solid var(--line);color:var(--bone);padding:10px 12px;font:inherit;border-radius:3px;width:100%}
 .empty{color:var(--mute);text-align:center;padding:30px 0}
 #demo{background:var(--blood);padding:8px 28px;font-size:14px}
 @media (max-width:900px){.hero,.wrap{grid-template-columns:1fr}.emb{order:-1}.emb svg{width:150px}.slab{clip-path:none}.wrap,.hero,header{padding-left:16px;padding-right:16px}}
@@ -58,12 +84,26 @@ textarea{resize:vertical;min-height:70px}
 <section class="hero"><div class="slab"><h1>BFEsp</h1><p>Forças Especiais do Exército Brasileiro</p></div><div class="emb"><svg id="em" viewBox="0 0 200 220"></svg></div></section>
 <main class="wrap">
 <form class="gate" id="gate"><b>Seu nome:</b><input id="nm" maxlength="24" placeholder="Nome de guerra (fica salvo para sempre)" autocomplete="off"><button class="btn">Registrar</button><small id="gm">Depois de registrado, o nome não pode ser trocado.</small></form>
+<section class="panel stream" id="sp"><h2>Transmissão ao vivo <span class="live off" id="stl">offline</span></h2>
+<div class="sbar"><span id="sinfo">Ninguém está transmitindo agora.</span><button type="button" class="btn" id="sgo">Transmitir tela</button><button type="button" class="btn" id="swt" hidden>Assistir</button><button type="button" class="btn ghost" id="ssp" hidden>Parar transmissão</button></div>
+<div class="vwrap" id="vw" hidden><video id="vd" playsinline autoplay></video><div class="vstat" id="vs">Conectando…</div><div class="hud" id="hud"></div>
+<div class="vctl"><button type="button" class="btn ghost" id="vm">Som</button><input type="range" id="vv" min="0" max="1" step="0.01" value="1" aria-label="Volume"><span style="flex:1"></span><button type="button" class="btn ghost" id="vf">Tela cheia</button><button type="button" class="btn ghost" id="vl">Sair</button></div></div></section>
 <section class="panel"><h2>Bate-papo da tropa <span class="live">ao vivo</span></h2><div id="msgs"></div>
 <form class="send" id="sf"><button type="button" class="btn ghost" id="pk" title="Enviar imagem">Foto</button><input type="file" id="fl" accept="image/*" hidden><input id="tx" maxlength="400" placeholder="Digite e aperte Enter" autocomplete="off"><button class="btn">Enviar</button></form></section>
 <section class="panel"><h2>Blacklist</h2>
 <form class="bl" id="bf"><input id="bn" maxlength="60" placeholder="Nome da pessoa"><textarea id="br" maxlength="300" placeholder="Motivo"></textarea><button class="btn">Adicionar à blacklist</button></form>
 <div id="list"></div></section>
 </main>
+<dialog id="so"><form id="sof"><h3>Transmitir tela</h3>
+<label>Resolução<select id="o_res"><option value="max">Máxima da tela (até 4K)</option><option value="1440">1440p</option><option value="1080">1080p</option><option value="720">720p</option></select></label>
+<label>Quadros por segundo<select id="o_fps"><option value="60">60 fps</option><option value="30">30 fps</option></select></label>
+<label>Prioridade<select id="o_hint"><option value="motion">Fluidez (jogos e vídeos)</option><option value="detail">Nitidez (texto e programas)</option></select></label>
+<label>Qualidade (limite de upload por espectador)<select id="o_bps"><option value="40000000">Máxima · até 40 Mbps</option><option value="20000000">Alta · até 20 Mbps</option><option value="10000000">Média · até 10 Mbps</option><option value="5000000">Econômica · até 5 Mbps</option></select></label>
+<label>Codec de vídeo<select id="o_codec"><option value="video/vp9">VP9 · melhor qualidade</option><option value="video/h264">H.264 · mais leve (usa a placa de vídeo)</option><option value="video/av1">AV1 · muito pesado</option></select></label>
+<label class="ck"><input type="checkbox" id="o_aud" checked> Transmitir o áudio da tela/aba</label>
+<label class="ck"><input type="checkbox" id="o_mic"> Incluir meu microfone</label>
+<small>Na janela do navegador, escolha a tela e marque “Compartilhar áudio do sistema” (ou da aba). Cada pessoa assistindo usa o seu upload: no máximo 5 ao mesmo tempo.</small>
+<div class="row"><button type="button" class="btn ghost" id="soc">Cancelar</button><button class="btn">Iniciar</button></div></form></dialog>
 <div id="lb" hidden onclick="this.hidden=true"><img alt=""></div>
 <script>
 var SH='<path d="M100 8L184 36V110C184 160 146 196 100 214 54 196 16 160 16 110V36Z" fill="#141416" stroke="#d1121f" stroke-width="7"/><path id="w" d="M94 84C70 74 46 78 26 62 42 94 68 104 94 100Z" fill="#efe9dd"/><use href="#w" transform="translate(200 0) scale(-1 1)"/><path d="M100 30L109 124 100 156 91 124Z" fill="#d1121f"/><rect x="74" y="120" width="52" height="9" fill="#efe9dd"/><rect x="96" y="129" width="8" height="30" fill="#efe9dd"/><circle cx="100" cy="165" r="7" fill="#efe9dd"/>';
@@ -79,7 +119,7 @@ function local(p,b){var q=p.split('?')[0];
  if(q==='delete'){['c','b'].forEach(function(k){S.s(k,JSON.stringify(J(k,[]).filter(function(m){return m.id!==b.id})))});return{s:200,d:{ok:true}}}
  return{s:200,d:{ok:true}}}
 async function api(p,b){if(!demo){try{var r=await fetch('/api/'+p,b?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)}:undefined);
- if(r.ok||r.status===409||r.status===400||r.status===403)return{s:r.status,d:await r.json()}}catch(e){}demo=true;$('#demo').hidden=false}return local(p,b)}
+ if(r.ok||r.status===409||r.status===400||r.status===403||r.status===410)return{s:r.status,d:await r.json()}}catch(e){}demo=true;$('#demo').hidden=false}return local(p,b)}
 function h(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
 function paintGate(){$('#gate').style.display='';if(me){$('#nm').value=me;$('#nm').disabled=true;$('#gate button').hidden=true;$('#gm').textContent='Nome salvo para sempre neste aparelho.'}}
 $('#gate').onsubmit=async function(e){e.preventDefault();var n=$('#nm').value.trim();if(n.length<2)return;var r=await api('name',{name:n,token:tok});
@@ -107,4 +147,158 @@ async function load(){var r=await api('blacklist'),l=$('#list'),st=l.scrollTop;l
 load();setInterval(load,4000);
 $('#bf').onsubmit=async function(e){e.preventDefault();if(!me){$('#nm').focus();return}var n=$('#bn').value.trim(),r=$('#br').value.trim();if(!n||!r)return;
  $('#bn').value=$('#br').value='';await api('blacklist',{name:n,reason:r,by:me});load()};
+
+/* ===== TRANSMISSÃO DE TELA ===== */
+(function(){
+var ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun.cloudflare.com:3478']}],MAXV=5;
+var live=null,role='',H=null,V=null,note=null,vd=$('#vd'),noShare=!(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia&&window.RTCPeerConnection);
+function rnd(){return Math.random().toString(36).slice(2,10)}
+function ticker(ms,fn){var w=new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(1)},'+ms+')'],{type:'text/javascript'})));w.onmessage=fn;return w}
+function fastStart(sdp){var vp={};sdp.replace(/a=rtpmap:(\d+) (?:VP8|VP9|H264|AV1)\/90000/g,function(m,pt){vp[pt]=1});
+ return sdp.split('\r\n').map(function(l){var m=l.match(/^a=fmtp:(\d+) /);return m&&vp[m[1]]&&l.indexOf('x-google-start-bitrate')<0?l+';x-google-start-bitrate=6000':l}).join('\r\n')}
+function opusSdp(sdp){var m=sdp.match(/a=rtpmap:(\d+) opus\/48000\/2/);if(!m)return sdp;var pt=m[1],add=['stereo=1','sprop-stereo=1','maxaveragebitrate=256000','maxplaybackrate=48000','useinbandfec=0','usedtx=0','cbr=0'],re=new RegExp('a=fmtp:'+pt+' (.*)');
+ if(re.test(sdp))return sdp.replace(re,function(_,x){var keep=x.split(';').filter(function(k){return!/^(stereo|sprop-stereo|maxaveragebitrate|maxplaybackrate|useinbandfec|usedtx|cbr)=/.test(k)});return'a=fmtp:'+pt+' '+keep.concat(add).join(';')});
+ return sdp.replace(m[0],m[0]+'\r\na=fmtp:'+pt+' '+add.join(';'))}
+function flash(t){note={t:t,until:Date.now()+7000};setUI();setTimeout(setUI,7100)}
+function setUI(){
+ var l=live,info=$('#sinfo'),go=$('#sgo'),wt=$('#swt'),sp=$('#ssp');
+ $('#stl').textContent=l?'ao vivo':'offline';$('#stl').classList.toggle('off',!l);
+ go.hidden=wt.hidden=sp.hidden=true;
+ if(demo){info.textContent='A transmissão só funciona no site publicado no Netlify.';return}
+ if(role==='host'){sp.hidden=false;return}
+ if(role==='viewer'){info.textContent=(l?l.name:'')+' · assistindo';return}
+ if(note&&note.until>Date.now())info.textContent=note.t;
+ else if(l&&l.name!==me){info.textContent=l.name+' está transmitindo'+(l.v&&l.v.length?' · '+l.v.length+' assistindo':'')}
+ else if(l){info.textContent='Sua transmissão anterior ainda está ativa. Você pode iniciar de novo.'}
+ else info.textContent='Ninguém está transmitindo agora.';
+ if(l&&l.name!==me)wt.hidden=false;else if(!noShare)go.hidden=false;
+ else if(noShare)info.textContent+=' (Para transmitir, use Chrome ou Edge no computador.)'}
+function applyLive(d){live=d.live||null;if(d.ice)ICE=d.ice;if(role==='viewer'&&(!live||live.sid!==V.sid))endView('A transmissão terminou.');setUI()}
+async function pollStream(){if(!demo){try{var r=await api('stream');if(r.s===200&&r.d)applyLive(r.d)}catch(e){}}else setUI();setTimeout(pollStream,document.hidden?6000:2500)}
+pollStream();
+
+/* ---------- opções ---------- */
+var dlg=$('#so'),OPT=['res','fps','hint','bps','codec'];
+$('#sgo').onclick=function(){if(!me){$('#nm').focus();return}
+ var s={};try{s=JSON.parse(S.g('bf_so'))||{}}catch(e){}
+ OPT.forEach(function(k){if(s[k])$('#o_'+k).value=s[k]});$('#o_aud').checked=s.aud!==false;$('#o_mic').checked=!!s.mic;dlg.showModal()};
+$('#soc').onclick=function(){dlg.close()};
+$('#sof').onsubmit=function(e){e.preventDefault();var o={};OPT.forEach(function(k){o[k]=$('#o_'+k).value});o.aud=$('#o_aud').checked;o.mic=$('#o_mic').checked;S.s('bf_so',JSON.stringify(o));dlg.close();begin(o)};
+
+/* ---------- ANFITRIÃO ---------- */
+function sigH(to,type,data){return api('sig',{sid:H.sid,to:to,from:'host',type:type,data:data})}
+function prefCodec(tr,mime){try{var caps=RTCRtpSender.getCapabilities('video').codecs,pick=caps.filter(function(c){return c.mimeType.toLowerCase()===mime}),rest=caps.filter(function(c){return c.mimeType.toLowerCase()!==mime});if(pick.length)tr.setCodecPreferences(pick.concat(rest))}catch(e){}}
+async function tune(sender,video){try{var p=sender.getParameters();if(!p.encodings||!p.encodings.length)p.encodings=[{}];var e=p.encodings[0];
+ if(video){e.maxBitrate=+H.o.bps;e.maxFramerate=+H.o.fps;e.scaleResolutionDownBy=1;p.degradationPreference=H.o.hint==='detail'?'maintain-resolution':'maintain-framerate'}else e.maxBitrate=256000;
+ e.priority='high';e.networkPriority='high';await sender.setParameters(p)}catch(x){}}
+async function begin(o){
+ if(role)return;
+ var ac=o.mic?new(window.AudioContext||window.webkitAudioContext)({sampleRate:48000}):null;
+ var R={max:[3840,2160],1440:[2560,1440],1080:[1920,1080],720:[1280,720]}[o.res]||[3840,2160],ds,mic=null;
+ try{ds=await navigator.mediaDevices.getDisplayMedia({video:{width:{ideal:R[0]},height:{ideal:R[1]},frameRate:{ideal:+o.fps,max:+o.fps}},
+  audio:o.aud?{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:2,sampleRate:48000}:false,
+  selfBrowserSurface:'exclude',surfaceSwitching:'include',systemAudio:'include',monitorTypeSurfaces:'include'})}catch(e){if(ac)ac.close();return}
+ var vt=ds.getVideoTracks()[0],at=ds.getAudioTracks()[0]||null;
+ if(o.mic){try{mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}})}catch(e){mic=null}}
+ if(ac&&mic){try{await ac.resume();var dst=ac.createMediaStreamDestination();if(at)ac.createMediaStreamSource(new MediaStream([at])).connect(dst);ac.createMediaStreamSource(mic).connect(dst);at=dst.stream.getAudioTracks()[0]}catch(e){}}
+ function abort(msg){ds.getTracks().forEach(function(t){t.stop()});if(mic)mic.getTracks().forEach(function(t){t.stop()});if(ac)ac.close();if(msg)alert(msg)}
+ var r=await api('stream/start',{name:me,token:tok});
+ if(r.s!==200){abort((r.d&&r.d.error)||'Não consegui iniciar a transmissão.');return}
+ vt.contentHint=o.hint;
+ H={sid:r.d.sid,o:o,ds:ds,mic:mic,ac:ac,vt:vt,at:at,peers:{},next:0,hb:0,st:0,busy:false,tk:null,unlock:null,stat:''};
+ role='host';vt.onended=function(){endHost('Compartilhamento encerrado.')};
+ if(navigator.locks)navigator.locks.request('bf-stream',function(){return new Promise(function(res){if(H)H.unlock=res;else res()})});
+ H.tk=ticker(250,hostTick);setUI();
+ var s=vt.getSettings();$('#sinfo').textContent='Você está transmitindo · '+s.width+'×'+s.height+' · '+Math.round(s.frameRate||0)+' fps · ninguém assistindo ainda';
+ if(!at&&o.aud)setTimeout(function(){if(H)alert('Atenção: o navegador não enviou áudio. Ao escolher a tela, marque “Compartilhar áudio do sistema” (no Windows) ou transmita uma aba.')},300)}
+async function addPeer(vid,name){
+ var X=H,pc=new RTCPeerConnection({iceServers:ICE,bundlePolicy:'max-bundle'}),P={pc:pc,name:name,pend:[],t:Date.now()};X.peers[vid]=P;
+ pc.onicecandidate=function(e){if(e.candidate&&H===X)sigH(vid,'ice',e.candidate.toJSON())};
+ pc.onconnectionstatechange=function(){var s=pc.connectionState;if(s==='connected'&&P.dt){clearTimeout(P.dt);P.dt=0}
+  if(s==='failed'||s==='closed')dropPeer(vid);else if(s==='disconnected'&&!P.dt)P.dt=setTimeout(function(){if(pc.connectionState!=='connected')dropPeer(vid)},8000)};
+ var vs=pc.addTrack(X.vt,X.ds),as=X.at?pc.addTrack(X.at,X.ds):null;
+ prefCodec(pc.getTransceivers().filter(function(t){return t.sender===vs})[0],X.o.codec);
+ var off=await pc.createOffer();off.sdp=opusSdp(off.sdp);await pc.setLocalDescription(off);
+ await tune(vs,true);if(as)await tune(as,false);
+ sigH(vid,'offer',{type:'offer',sdp:off.sdp})}
+function dropPeer(vid){var P=H&&H.peers[vid];if(!P)return;try{P.pc.close()}catch(e){}if(P.dt)clearTimeout(P.dt);delete H.peers[vid]}
+async function hostMsg(m){var vid=m.from,P=H.peers[vid];
+ if(m.type==='join'){if(P)return;if(Object.keys(H.peers).length>=MAXV){sigH(vid,'full',{});return}await addPeer(vid,(m.data&&m.data.name)||'?')}
+ else if(!P)return;
+ else if(m.type==='answer'){try{if(P.pc.signalingState==='have-local-offer'){await P.pc.setRemoteDescription(m.data);for(var c of P.pend.splice(0))try{await P.pc.addIceCandidate(c)}catch(e){}}}catch(e){}}
+ else if(m.type==='ice'){if(P.pc.remoteDescription){try{await P.pc.addIceCandidate(m.data)}catch(e){}}else P.pend.push(m.data)}
+ else if(m.type==='leave')dropPeer(vid)}
+async function hostStats(X){var names=[],best=null;
+ for(var vid in X.peers){var P=X.peers[vid];if(P.pc.connectionState!=='connected')continue;names.push(P.name);
+  (await P.pc.getStats()).forEach(function(s){if(s.type==='outbound-rtp'&&s.kind==='video'&&s.frameWidth){var mb=P.lb!=null?(s.bytesSent-P.lb)*8/((s.timestamp-P.lt)/1000)/1e6:0;P.lb=s.bytesSent;P.lt=s.timestamp;best={res:s.frameWidth+'×'+s.frameHeight,fps:Math.round(s.framesPerSecond||0),mb:mb,lim:s.qualityLimitationReason}}})}
+ var t;if(!names.length){var st=X.vt.getSettings();t='Você está transmitindo · '+st.width+'×'+st.height+' · '+Math.round(st.frameRate||0)+' fps · ninguém assistindo ainda'}
+ else{t='Você está transmitindo · '+(best?best.res+' · '+best.fps+' fps · '+best.mb.toFixed(1)+' Mbps por espectador · ':'')+names.length+' assistindo: '+names.join(', ');
+  if(best&&best.lim&&best.lim!=='none')t+=' · limitado por '+({bandwidth:'upload (internet)',cpu:'processador'}[best.lim]||best.lim)}
+ X.names=names;if(H===X&&role==='host')$('#sinfo').textContent=t}
+async function hostTick(){var X=H;if(!X||X.busy)return;var now=Date.now();if(now<X.next)return;X.busy=true;
+ try{var busy=Object.keys(X.peers).some(function(k){return X.peers[k].pc.connectionState!=='connected'});X.next=now+(busy?350:1000);
+  var r=await api('sig?sid='+X.sid+'&to=host');
+  if(r.s===410){X.busy=false;endHost('A sessão de transmissão expirou.');return}
+  if(r.s===200&&Array.isArray(r.d))for(var m of r.d){if(H!==X)break;try{await hostMsg(m)}catch(e){}}
+  if(H===X&&now-X.hb>4000){X.hb=now;var hr=await api('stream/hb',{sid:X.sid,name:me,token:tok,v:X.names||[]});if(hr.s===410){X.busy=false;endHost('A sessão de transmissão expirou.');return}}
+  if(H===X&&now-X.st>2000){X.st=now;await hostStats(X)}
+ }catch(e){}finally{X.busy=false}}
+function endHost(msg){var X=H;if(!X)return;H=null;role='';
+ try{X.tk.terminate()}catch(e){}
+ Object.keys(X.peers).forEach(function(k){try{X.peers[k].pc.close()}catch(e){}});
+ X.ds.getTracks().forEach(function(t){t.onended=null;t.stop()});if(X.mic)X.mic.getTracks().forEach(function(t){t.stop()});if(X.ac)try{X.ac.close()}catch(e){}
+ if(X.unlock)X.unlock();api('stream/stop',{sid:X.sid,name:me,token:tok});live=null;flash(msg||'Transmissão encerrada.')}
+$('#ssp').onclick=function(){endHost('Transmissão encerrada.')};
+
+/* ---------- ESPECTADOR ---------- */
+function sigV(type,data){var X=V;return api('sig',{sid:X.sid,to:'host',from:X.vid,type:type,data:data})}
+async function watch(){
+ if(role||!live)return;if(!me){$('#nm').focus();return}
+ var l=live;V={sid:l.sid,vid:'v'+rnd(),pc:null,pend:[],ms:new MediaStream(),next:0,st:0,busy:false,ok:false,start:Date.now(),lb:null,lt:0,tk:null,dt:0};
+ var X=V;role='viewer';$('#vw').hidden=false;$('#vs').hidden=false;$('#vs').textContent='Conectando…';$('#hud').textContent='';vd.srcObject=X.ms;setUI();
+ var r=await api('sig',{sid:l.sid,to:'host',from:X.vid,type:'join',name:me,token:tok});
+ if(V!==X)return;
+ if(r.s!==200){endView((r.d&&r.d.error)||'Não consegui entrar na transmissão.');return}
+ X.tk=ticker(250,viewTick)}
+$('#swt').onclick=watch;
+async function viewMsg(X,m){
+ if(m.type==='offer'){if(X.pc)return;
+  var pc=new RTCPeerConnection({iceServers:ICE,bundlePolicy:'max-bundle'});X.pc=pc;
+  pc.onicecandidate=function(e){if(e.candidate&&V===X)sigV('ice',e.candidate.toJSON())};
+  pc.ontrack=function(e){X.ms.addTrack(e.track);vd.muted=false;var p=vd.play();if(p&&p.catch)p.catch(function(){vd.muted=true;$('#vm').textContent='Ativar som';vd.play().catch(function(){})})};
+  pc.onconnectionstatechange=function(){var s=pc.connectionState;
+   if(s==='connected'){X.ok=true;if(X.dt){clearTimeout(X.dt);X.dt=0}$('#vs').hidden=true}
+   else if(s==='failed')endView('A conexão com a transmissão falhou. Tente assistir de novo.');
+   else if(s==='disconnected'){$('#vs').hidden=false;$('#vs').textContent='Reconectando…';if(!X.dt)X.dt=setTimeout(function(){if(V===X&&pc.connectionState!=='connected')endView('A conexão com a transmissão caiu.')},9000)}};
+  await pc.setRemoteDescription(m.data);for(var c of X.pend.splice(0))try{await pc.addIceCandidate(c)}catch(e){}
+  var ans=await pc.createAnswer();ans.sdp=fastStart(opusSdp(ans.sdp));await pc.setLocalDescription(ans);sigV('answer',{type:'answer',sdp:ans.sdp})}
+ else if(m.type==='ice'){if(X.pc&&X.pc.remoteDescription){try{await X.pc.addIceCandidate(m.data)}catch(e){}}else X.pend.push(m.data)}
+ else if(m.type==='full')endView('Transmissão lotada (máximo de '+MAXV+' pessoas).')}
+async function viewStats(X){if(!X.pc)return;var cod={},v=null,rtt=null;
+ (await X.pc.getStats()).forEach(function(s){if(s.type==='codec')cod[s.id]=s.mimeType;if(s.type==='inbound-rtp'&&s.kind==='video')v=s;if(s.type==='candidate-pair'&&s.state==='succeeded'&&s.currentRoundTripTime!=null)rtt=s.currentRoundTripTime});
+ if(!v||!v.frameWidth)return;var mb=X.lb!=null?(v.bytesReceived-X.lb)*8/((v.timestamp-X.lt)/1000)/1e6:0;X.lb=v.bytesReceived;X.lt=v.timestamp;
+ $('#hud').textContent=[v.frameWidth+'×'+v.frameHeight,Math.round(v.framesPerSecond||0)+' fps',mb.toFixed(1)+' Mbps',(cod[v.codecId]||'').replace('video/','').toUpperCase(),rtt!=null?Math.round(rtt*1000)+' ms':''].filter(Boolean).join(' · ')}
+async function viewTick(){var X=V;if(!X||X.busy)return;var now=Date.now();X.busy=true;
+ try{if(!X.ok&&now>=X.next){X.next=now+400;var r=await api('sig?sid='+X.sid+'&to='+X.vid);
+   if(r.s===410){X.busy=false;endView('A transmissão terminou.');return}
+   if(r.s===200&&Array.isArray(r.d))for(var m of r.d){if(V!==X)break;try{await viewMsg(X,m)}catch(e){}}}
+  if(V===X&&X.ok&&now-X.st>=1000){X.st=now;await viewStats(X)}
+  if(V===X&&!X.ok&&now-X.start>30000){X.busy=false;endView('Não consegui conectar à transmissão. Pode ser bloqueio de rede (firewall/NAT).');return}
+ }catch(e){}finally{X.busy=false}}
+function endView(msg){var X=V;if(!X)return;V=null;role='';
+ try{if(X.tk)X.tk.terminate()}catch(e){}if(X.dt)clearTimeout(X.dt);try{if(X.pc)X.pc.close()}catch(e){}
+ api('sig',{sid:X.sid,to:'host',from:X.vid,type:'leave',data:{}});
+ vd.srcObject=null;$('#vw').hidden=true;try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
+ if(msg)flash(msg);else setUI()}
+$('#vl').onclick=function(){endView('')};
+$('#vm').onclick=function(){vd.muted=!vd.muted;this.textContent=vd.muted?'Ativar som':'Som'};
+$('#vv').oninput=function(){vd.volume=+this.value;if(vd.muted&&vd.volume>0){vd.muted=false;$('#vm').textContent='Som'}};
+function fs(){var w=$('#vw');if(document.fullscreenElement)document.exitFullscreen();else if(w.requestFullscreen)w.requestFullscreen()}
+$('#vf').onclick=fs;vd.ondblclick=fs;
+
+addEventListener('pagehide',function(){try{
+ if(H)navigator.sendBeacon('/api/stream/stop',new Blob([JSON.stringify({sid:H.sid,name:me,token:tok})],{type:'application/json'}));
+ if(V)navigator.sendBeacon('/api/sig',new Blob([JSON.stringify({sid:V.sid,to:'host',from:V.vid,type:'leave',data:{}})],{type:'application/json'}))}catch(e){}});
+window.__bf={get host(){return H},get view(){return V}};
+})();
 </script></body></html>
