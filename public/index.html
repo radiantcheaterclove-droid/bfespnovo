@@ -39,6 +39,8 @@ textarea{resize:vertical;min-height:70px}
 .fi{border:1px solid var(--red);background:#120a0b;padding:12px 14px;position:relative;font-family:'Special Elite',monospace}
 .fi:after{content:"BLACKLIST";position:absolute;right:10px;top:8px;border:2px solid var(--red);color:var(--red);padding:0 6px;font:800 12px 'Barlow Condensed';letter-spacing:.14em;transform:rotate(6deg)}
 .fi h3{font:400 20px 'Special Elite';color:#fff;padding-right:90px}.fi p{margin:4px 0 6px;color:#e6d9d0}.fi small{color:var(--mute)}
+.ghost{background:#2a2b2f;box-shadow:0 4px 0 #101113}.m img{display:block;max-width:100%;max-height:260px;border-radius:6px;margin-top:6px;cursor:zoom-in}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:grid;place-items:center;z-index:50;cursor:zoom-out}#lb[hidden]{display:none}#lb img{max-width:94%;max-height:92%}
 .empty{color:var(--mute);text-align:center;padding:30px 0}
 #demo{background:var(--blood);padding:8px 28px;font-size:14px}
 @media (max-width:900px){.hero,.wrap{grid-template-columns:1fr}.emb{order:-1}.emb svg{width:150px}.slab{clip-path:none}.wrap,.hero,header{padding-left:16px;padding-right:16px}}
@@ -49,11 +51,12 @@ textarea{resize:vertical;min-height:70px}
 <main class="wrap">
 <form class="gate" id="gate"><b>Seu nome:</b><input id="nm" maxlength="24" placeholder="Nome de guerra (fica salvo para sempre)" autocomplete="off"><button class="btn">Registrar</button><small id="gm">Depois de registrado, o nome não pode ser trocado.</small></form>
 <section class="panel"><h2>Bate-papo da tropa <span class="live">ao vivo</span></h2><div id="msgs"></div>
-<form class="send" id="sf"><input id="tx" maxlength="400" placeholder="Digite e aperte Enter" autocomplete="off"><button class="btn">Enviar</button></form></section>
+<form class="send" id="sf"><button type="button" class="btn ghost" id="pk" title="Enviar imagem">Foto</button><input type="file" id="fl" accept="image/*" hidden><input id="tx" maxlength="400" placeholder="Digite e aperte Enter" autocomplete="off"><button class="btn">Enviar</button></form></section>
 <section class="panel"><h2>Blacklist</h2>
 <form class="bl" id="bf"><input id="bn" maxlength="60" placeholder="Nome da pessoa"><textarea id="br" maxlength="300" placeholder="Motivo"></textarea><button class="btn">Adicionar à blacklist</button></form>
 <div id="list"></div></section>
 </main>
+<div id="lb" hidden onclick="this.hidden=true"><img alt=""></div>
 <script>
 var SH='<path d="M100 8L184 36V110C184 160 146 196 100 214 54 196 16 160 16 110V36Z" fill="#141416" stroke="#d1121f" stroke-width="7"/><path id="w" d="M94 84C70 74 46 78 26 62 42 94 68 104 94 100Z" fill="#efe9dd"/><use href="#w" transform="translate(200 0) scale(-1 1)"/><path d="M100 30L109 124 100 156 91 124Z" fill="#d1121f"/><rect x="74" y="120" width="52" height="9" fill="#efe9dd"/><rect x="96" y="129" width="8" height="30" fill="#efe9dd"/><circle cx="100" cy="165" r="7" fill="#efe9dd"/>';
 lg.innerHTML=SH;em.innerHTML=SH;
@@ -62,7 +65,7 @@ var S={g:function(k){try{return localStorage.getItem(k)}catch(e){return null}},s
 var me=S.g('bf_name')||'',tok=S.g('bf_tok')||String(Math.random()).slice(2)+Date.now();S.s('bf_tok',tok);
 function J(k,d){try{return JSON.parse(S.g(k))||d}catch(e){return d}}
 function local(p,b){var q=p.split('?')[0];
- if(q==='chat'){var a=J('c',[]);if(b){var m={id:'l'+String(Date.now()).padStart(15,'0'),cid:b.cid,name:b.name,text:b.text,ts:Date.now()};a.push(m);S.s('c',JSON.stringify(a));return{s:200,d:m}}
+ if(q==='chat'){var a=J('c',[]);if(b){var m={id:'l'+String(Date.now()).padStart(15,'0'),cid:b.cid,name:b.name,text:b.text,img:b.img,ts:Date.now()};a.push(m);S.s('c',JSON.stringify(a));return{s:200,d:m}}
   var af=decodeURIComponent((p.split('after=')[1]||''));return{s:200,d:af?a.filter(function(m){return m.id>af}):a.slice(-80)}}
  if(q==='blacklist'){var l=J('b',[]);if(b){b.id='l'+Date.now();b.ts=Date.now();l.push(b);S.s('b',JSON.stringify(l));return{s:200,d:b}}return{s:200,d:l}}
  return{s:200,d:{ok:true}}}
@@ -73,10 +76,14 @@ function paintGate(){$('#gate').style.display='';if(me){$('#nm').value=me;$('#nm
 $('#gate').onsubmit=async function(e){e.preventDefault();var n=$('#nm').value.trim();if(n.length<2)return;var r=await api('name',{name:n,token:tok});
  if(r.s!==200){$('#gm').textContent=r.d.error||'Erro';return}me=n;S.s('bf_name',n);paintGate()};paintGate();
 var seen={},last='',box=$('#msgs');
-function add(m){var k=m.cid||m.id;if(seen[k])return;seen[k]=1;var near=box.scrollHeight-box.scrollTop-box.clientHeight<90,d=h('div','m'+(m.name===me?' me':''));d.appendChild(h('b','',m.name));d.appendChild(h('span','',m.text));box.appendChild(d);if(near||m.name===me)box.scrollTop=box.scrollHeight}
+function add(m){var k=m.cid||m.id;if(seen[k])return;seen[k]=1;var near=box.scrollHeight-box.scrollTop-box.clientHeight<90,d=h('div','m'+(m.name===me?' me':''));d.appendChild(h('b','',m.name));if(m.text)d.appendChild(h('span','',m.text));if(m.img){var im=h('img');im.src=m.img;im.alt='Imagem enviada por '+m.name;im.onclick=function(){$('#lb img').src=m.img;$('#lb').hidden=false};im.onload=function(){if(near||m.name===me)box.scrollTop=box.scrollHeight};d.appendChild(im)}box.appendChild(d);if(near||m.name===me)box.scrollTop=box.scrollHeight}
 async function poll(){try{var r=await api('chat?after='+encodeURIComponent(last));r.d.forEach(function(m){if(m.id>last)last=m.id;add(m)})}catch(e){}setTimeout(poll,document.hidden?3000:700)}poll();
 $('#sf').onsubmit=async function(e){e.preventDefault();var t=$('#tx').value.trim();if(!t)return;if(!me){$('#nm').focus();return}$('#tx').value='';
  var c=Math.random().toString(36).slice(2),m={cid:c,name:me,text:t};add(m);await api('chat',m)};
+function shrink(f){return new Promise(function(ok,no){var u=URL.createObjectURL(f),i=new Image();i.onload=function(){var s=Math.min(1,1000/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*s;c.height=i.height*s;c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);var d=c.toDataURL('image/jpeg',.72);if(d.length>650000)d=c.toDataURL('image/jpeg',.45);ok(d)};i.onerror=no;i.src=u})}
+$('#pk').onclick=function(){if(!me){$('#nm').focus();return}$('#fl').click()};
+$('#fl').onchange=async function(){var f=this.files[0];this.value='';if(!f||!/^image\//.test(f.type))return;
+ try{var d=await shrink(f),m={cid:Math.random().toString(36).slice(2),name:me,text:'',img:d};add(m);await api('chat',m)}catch(e){alert('Não consegui enviar essa imagem.')}};
 function fmt(t){return new Date(t).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}
 async function load(){var r=await api('blacklist'),l=$('#list');l.textContent='';if(!r.d.length){l.appendChild(h('div','empty','Nenhum nome na blacklist.'));return}
  r.d.slice().sort(function(a,b){return b.ts-a.ts}).forEach(function(e){var f=h('div','fi');f.appendChild(h('h3','',e.name));f.appendChild(h('p','',e.reason));f.appendChild(h('small','','por '+e.by+' · '+fmt(e.ts)));l.appendChild(f)})}
