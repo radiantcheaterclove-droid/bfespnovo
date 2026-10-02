@@ -11,11 +11,18 @@ export default async (req) => {
     if (after !== undefined) ks = after ? ks.filter((k) => k > after) : ks.slice(-80);
     return Promise.all(ks.map((k) => store.get(k, { type: "json" })));
   };
+  if (p === "img") {
+    const d = await store.get("i/" + (u.searchParams.get("id") || ""));
+    if (!d) return J({ error: "not found" }, 404);
+    return new Response(Buffer.from(d.split(",")[1], "base64"), { headers: { "content-type": "image/jpeg", "cache-control": "public, max-age=31536000, immutable" } });
+  }
   if (p === "chat") {
     if (!post) return J(await all("m/", u.searchParams.get("after") || ""));
     const name = cl(b.name, 24), text = cl(b.text, 400);
-    if (!name || !text) return J({ error: "vazio" }, 400);
+    const img = typeof b.img === "string" && b.img.length < 700000 && /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(b.img) ? b.img : "";
+    if (!name || (!text && !img)) return J({ error: "vazio" }, 400);
     const m = { id: key("m/"), cid: cl(b.cid, 40), name, text, ts: Date.now() };
+    if (img) { await store.set("i/" + m.id, img); m.img = "/api/img?id=" + encodeURIComponent(m.id); }
     await store.setJSON(m.id, m);
     return J(m);
   }
