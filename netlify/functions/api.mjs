@@ -28,13 +28,16 @@ export default async (req) => {
   }
   if (p === "delete" && post) {
     const id = cl(b.id, 80), name = cl(b.name, 24), tok = cl(b.token, 60);
-    if (!id.startsWith("m/") || !name || !tok) return J({ error: "inválido" }, 400);
+    const isMsg = id.startsWith("m/");
+    if ((!isMsg && !id.startsWith("b/")) || !name || !tok) return J({ error: "inválido" }, 400);
     const acc = await store.get("n/" + encodeURIComponent(name.toLowerCase()), { type: "json" });
     if (!acc || acc.token !== tok) return J({ error: "Sem permissão" }, 403);
     const m = await store.get(id, { type: "json" });
     if (!m) return J({ ok: true });
-    if (String(m.name).toLowerCase() !== name.toLowerCase()) return J({ error: "Você só pode apagar a sua própria mensagem" }, 403);
+    const owner = isMsg ? m.name : m.by;
+    if (String(owner).toLowerCase() !== name.toLowerCase()) return J({ error: isMsg ? "Você só pode apagar a sua própria mensagem" : "Só quem adicionou pode remover da blacklist" }, 403);
     await store.delete(id);
+    if (!isMsg) return J({ ok: true });
     if (m.img) await store.delete("i/" + id);
     const now = Date.now();
     await store.set("x/" + String(now).padStart(15, "0") + "|" + id, "1");
